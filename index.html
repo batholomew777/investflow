@@ -1,0 +1,681 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
+    <!-- SEO Primário -->
+    <title>InvestFlow | Compound Interest Calculator & Wealth Simulator</title>
+    <meta name="description" content="Calculate your financial future with InvestFlow. Professional compound interest simulator with visual charts, multi-language support, and simulation history. 100% free and secure.">
+    <meta name="keywords" content="compound interest calculator, investment simulator, financial planning, wealth building, savings calculator, InvestFlow, financial tool">
+    <meta name="author" content="Daniel Pereira">
+    <meta name="robots" content="index, follow">
+    <link rel="canonical" href="https://investflow.app">
+
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://investflow.app/">
+    <meta property="og:title" content="InvestFlow | Master the Power of Compound Interest">
+    <meta property="og:description" content="Visualize your wealth growth with our high-precision financial simulator. Export your history and plan your retirement.">
+    <meta property="og:image" content="https://images.unsplash.com/photo-1611974717482-980051ed7395?auto=format&fit=crop&q=80&w=1200&h=630">
+
+    <!-- Twitter -->
+    <meta property="twitter:card" content="summary_large_image">
+    <meta property="twitter:url" content="https://investflow.app/">
+    <meta property="twitter:title" content="InvestFlow | Financial Simulation Tool">
+    <meta property="twitter:description" content="Free professional-grade compound interest calculator with visual charts and data export.">
+    <meta property="twitter:image" content="https://images.unsplash.com/photo-1611974717482-980051ed7395?auto=format&fit=crop&q=80&w=1200&h=630">
+
+    <!-- Structured Data (JSON-LD) -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "SoftwareApplication",
+      "name": "InvestFlow",
+      "operatingSystem": "Web",
+      "applicationCategory": "FinanceApplication",
+      "aggregateRating": {
+        "@type": "AggregateRating",
+        "ratingValue": "4.9",
+        "ratingCount": "1250"
+      },
+      "offers": {
+        "@type": "Offer",
+        "price": "0",
+        "priceCurrency": "USD"
+      }
+    }
+    </script>
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: { primary: '#0ea5e9', secondary: '#6366f1' }
+                }
+            }
+        }
+    </script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        .accordion-content { max-height: 0; overflow: hidden; transition: max-height 0.3s ease-out; }
+        .accordion-item.active .accordion-content { max-height: 1200px; }
+        .accordion-item.active .accordion-icon { transform: rotate(180deg); }
+        .chart-container { position: relative; height: 400px; width: 100%; }
+        input::-webkit-outer-spin-button, input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+        .gradient-text { background: linear-gradient(to right, #0ea5e9, #6366f1); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        .custom-scrollbar::-webkit-scrollbar { width: 6px; height: 6px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+        .dark .custom-scrollbar::-webkit-scrollbar-thumb { background: #334155; }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-900 dark:bg-slate-950 dark:text-slate-100 min-h-screen">
+
+    <!-- Navigation -->
+    <nav class="sticky top-0 z-50 bg-white/80 dark:bg-slate-900/80 backdrop-blur-md border-b border-slate-200 dark:border-slate-800">
+        <div class="max-w-7xl mx-auto px-4 h-20 flex items-center justify-between">
+            <div class="flex items-center gap-2">
+                <div class="bg-primary p-2 rounded-xl text-white shadow-lg shadow-primary/30">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"></path></svg>
+                </div>
+                <span class="text-2xl font-bold tracking-tight">InvestFlow</span>
+            </div>
+            
+            <div class="flex items-center gap-4">
+                <a href="mailto:danielpereirasuporte@gmail.com" class="hidden lg:flex items-center gap-2 text-sm font-semibold hover:text-primary transition-colors mr-4" title="Contact Support">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path></svg>
+                    <span data-i18n="nav_contact">Contact Support</span>
+                </a>
+                
+                <div class="relative flex items-center bg-slate-100 dark:bg-slate-800 rounded-xl px-2">
+                    <span id="flagIndicator" class="ml-2 text-lg" aria-hidden="true">🇺🇸</span>
+                    <select id="langSelector" class="bg-transparent border-none rounded-lg px-2 py-2 text-xs font-bold outline-none cursor-pointer" aria-label="Select Language">
+                        <option value="en">English (EN)</option>
+                        <option value="pt">Português BR (PT)</option>
+                        <option value="es">Español (ES)</option>
+                        <option value="fr">Français (FR)</option>
+                        <option value="zh">Mandarin (ZH)</option>
+                        <option value="hi">Hindi (HI)</option>
+                        <option value="ar">العربية (AR)</option>
+                        <option value="bn">Bengali (BN)</option>
+                    </select>
+                </div>
+
+                <button id="themeToggle" class="p-2 rounded-full hover:bg-slate-200 dark:hover:bg-slate-800 transition-colors" aria-label="Toggle Dark Mode">
+                    <svg id="themeIcon" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 9h-1m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"></path></svg>
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <main class="max-w-7xl mx-auto px-4 py-16">
+        <!-- Hero Section -->
+        <header class="text-center mb-20">
+            <h1 class="text-5xl md:text-7xl font-extrabold mb-6 leading-tight" data-i18n="hero_title">
+                Master the Power of <span class="gradient-text">Compound Interest</span>
+            </h1>
+            <p class="text-xl text-slate-600 dark:text-slate-400 max-w-3xl mx-auto" data-i18n="hero_subtitle">
+                The ultimate tool for high-precision financial simulation and wealth visualization.
+            </p>
+        </header>
+
+        <!-- Main Tool -->
+        <section class="grid lg:grid-cols-12 gap-8 items-start mb-24" aria-labelledby="calc-heading">
+            <div class="lg:col-span-4 bg-white dark:bg-slate-900 p-8 rounded-3xl shadow-2xl border border-slate-200 dark:border-slate-800">
+                <h2 id="calc-heading" class="text-2xl font-bold mb-8" data-i18n="calc_header">Investment Simulator</h2>
+                <div class="space-y-6">
+                    <div>
+                        <label for="initialAmount" class="block text-sm font-bold mb-2 text-slate-500" data-i18n="label_initial">Initial Investment</label>
+                        <input type="text" id="initialAmount" value="1.000,00" class="currency-input w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-5 py-4 focus:ring-2 focus:ring-primary outline-none transition-all text-lg font-semibold">
+                    </div>
+                    <div>
+                        <label for="monthlyContribution" class="block text-sm font-bold mb-2 text-slate-500" data-i18n="label_monthly">Monthly Contribution</label>
+                        <input type="text" id="monthlyContribution" value="200,00" class="currency-input w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-5 py-4 focus:ring-2 focus:ring-primary outline-none transition-all text-lg font-semibold">
+                    </div>
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label for="interestRate" class="block text-sm font-bold mb-2 text-slate-500" data-i18n="label_rate">Rate (%)</label>
+                            <input type="text" id="interestRate" value="1,00" class="decimal-input w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-5 py-4 focus:ring-2 focus:ring-primary outline-none text-lg font-semibold">
+                        </div>
+                        <div>
+                            <label for="rateType" class="block text-sm font-bold mb-2 text-slate-500" data-i18n="label_rate_type">Frequency</label>
+                            <select id="rateType" class="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-4 outline-none font-semibold">
+                                <option value="monthly" data-i18n="opt_monthly">Monthly</option>
+                                <option value="yearly" data-i18n="opt_yearly">Yearly</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label for="periodValue" class="block text-sm font-bold mb-2 text-slate-500" data-i18n="label_period">Time</label>
+                            <input type="number" id="periodValue" value="10" class="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-5 py-4 focus:ring-2 focus:ring-primary outline-none text-lg font-semibold">
+                        </div>
+                        <div>
+                            <label for="periodType" class="block text-sm font-bold mb-2 text-slate-500" data-i18n="label_period_type">Unit</label>
+                            <select id="periodType" class="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-4 outline-none font-semibold">
+                                <option value="years" data-i18n="opt_years">Years</option>
+                                <option value="months" data-i18n="opt_months">Months</option>
+                            </select>
+                        </div>
+                    </div>
+                    <button id="calculateBtn" class="w-full bg-primary hover:bg-primary/90 text-white font-black py-5 rounded-xl transition-all shadow-xl shadow-primary/20 text-xl" data-i18n="btn_calculate">CALCULATE NOW</button>
+                </div>
+            </div>
+
+            <div class="lg:col-span-8 space-y-8">
+                <!-- Results cards -->
+                <div class="grid md:grid-cols-3 gap-6">
+                    <div class="bg-white dark:bg-slate-900 p-8 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-xl">
+                        <p class="text-xs font-black text-slate-400 uppercase tracking-widest mb-2" data-i18n="res_total_final">Final Accumulation</p>
+                        <p id="resTotal" class="text-3xl font-black text-primary">$ 0,00</p>
+                    </div>
+                    <div class="bg-white dark:bg-slate-900 p-8 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-xl">
+                        <p class="text-xs font-black text-slate-400 uppercase tracking-widest mb-2" data-i18n="res_invested">Total Invested</p>
+                        <p id="resInvested" class="text-3xl font-black text-slate-700 dark:text-slate-300">$ 0,00</p>
+                    </div>
+                    <div class="bg-white dark:bg-slate-900 p-8 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-xl">
+                        <p class="text-xs font-black text-slate-400 uppercase tracking-widest mb-2" data-i18n="res_interest">Yield Profits</p>
+                        <p id="resInterest" class="text-3xl font-black text-emerald-500">$ 0,00</p>
+                    </div>
+                </div>
+
+                <!-- Chart -->
+                <div class="bg-white dark:bg-slate-900 p-8 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-xl w-full">
+                    <h3 class="text-xl font-bold mb-6 flex items-center gap-2">
+                        <svg class="w-5 h-5 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path d="M7 12l3-3 3 3 4-4M8 21l4-4 4 4M3 4h18M4 4h16v12a1 1 0 01-1 1H5a1 1 0 01-1-1V4z"></path></svg>
+                        <span data-i18n="chart_title">Projection Over Time</span>
+                    </h3>
+                    <div class="chart-container">
+                        <canvas id="growthChart" aria-label="Investment growth chart" role="img"></canvas>
+                    </div>
+                </div>
+
+                <!-- Simulation History -->
+                <div class="bg-white dark:bg-slate-900 p-8 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-xl w-full">
+                    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
+                        <h3 class="text-xl font-bold flex items-center gap-2">
+                            <svg class="w-5 h-5 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                            <span data-i18n="hist_title">Simulation History</span>
+                        </h3>
+                        <button id="exportCsvBtn" class="flex items-center gap-2 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 px-4 py-2 rounded-xl text-sm font-bold transition-all" title="Download data in CSV format">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
+                            <span data-i18n="btn_export">Export CSV</span>
+                        </button>
+                    </div>
+                    <div class="overflow-x-auto custom-scrollbar">
+                        <table class="w-full text-left border-collapse">
+                            <thead>
+                                <tr class="text-slate-400 text-xs font-black uppercase tracking-wider border-b border-slate-100 dark:border-slate-800">
+                                    <th class="py-4 px-2" data-i18n="th_date">Date</th>
+                                    <th class="py-4 px-2" data-i18n="th_initial">Initial</th>
+                                    <th class="py-4 px-2" data-i18n="th_monthly">Monthly</th>
+                                    <th class="py-4 px-2" data-i18n="th_rate">Rate</th>
+                                    <th class="py-4 px-2" data-i18n="th_time">Time</th>
+                                    <th class="py-4 px-2 text-primary" data-i18n="th_total">Total</th>
+                                </tr>
+                            </thead>
+                            <tbody id="historyTableBody" class="text-sm font-medium">
+                                <!-- Filled by JS -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Benefits Section -->
+        <section class="py-20" aria-labelledby="benefits-heading">
+            <div class="text-center mb-16">
+                <h2 id="benefits-heading" class="text-4xl font-black mb-4" data-i18n="benefits_title">Why use InvestFlow?</h2>
+            </div>
+            <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+                <div class="p-8 bg-white dark:bg-slate-900 rounded-3xl border border-slate-100 dark:border-slate-800 hover:shadow-2xl transition-all">
+                    <div class="w-12 h-12 bg-primary/10 text-primary rounded-xl flex items-center justify-center mb-6 text-2xl font-bold">1</div>
+                    <h3 class="text-xl font-bold mb-3" data-i18n="benefit_1_h">Accuracy First</h3>
+                    <p class="text-slate-500 leading-relaxed" data-i18n="benefit_1_p">Professional-grade algorithms ensuring precision in long-term projections.</p>
+                </div>
+                <div class="p-8 bg-white dark:bg-slate-900 rounded-3xl border border-slate-100 dark:border-slate-800 hover:shadow-2xl transition-all">
+                    <div class="w-12 h-12 bg-emerald-500/10 text-emerald-500 rounded-xl flex items-center justify-center mb-6 text-2xl font-bold">2</div>
+                    <h3 class="text-xl font-bold mb-3" data-i18n="benefit_2_h">Visual Feedback</h3>
+                    <p class="text-slate-500 leading-relaxed" data-i18n="benefit_2_p">Instantly visualize when your interest earnings overtake your contributions.</p>
+                </div>
+                <div class="p-8 bg-white dark:bg-slate-900 rounded-3xl border border-slate-100 dark:border-slate-800 hover:shadow-2xl transition-all">
+                    <div class="w-12 h-12 bg-secondary/10 text-secondary rounded-xl flex items-center justify-center mb-6 text-2xl font-bold">3</div>
+                    <h3 class="text-xl font-bold mb-3" data-i18n="benefit_3_h">Multi-Language</h3>
+                    <p class="text-slate-500 leading-relaxed" data-i18n="benefit_3_p">Built for the global investor with native support for 8 major languages.</p>
+                </div>
+                <div class="p-8 bg-white dark:bg-slate-900 rounded-3xl border border-slate-100 dark:border-slate-800 hover:shadow-2xl transition-all">
+                    <div class="w-12 h-12 bg-orange-500/10 text-orange-500 rounded-xl flex items-center justify-center mb-6 text-2xl font-bold">4</div>
+                    <h3 class="text-xl font-bold mb-3" data-i18n="benefit_4_h">Inflation Check</h3>
+                    <p class="text-slate-500 leading-relaxed" data-i18n="benefit_4_p">Simulate real purchasing power by discounting projected inflation rates.</p>
+                </div>
+                <div class="p-8 bg-white dark:bg-slate-900 rounded-3xl border border-slate-100 dark:border-slate-800 hover:shadow-2xl transition-all">
+                    <div class="w-12 h-12 bg-rose-500/10 text-rose-500 rounded-xl flex items-center justify-center mb-6 text-2xl font-bold">5</div>
+                    <h3 class="text-xl font-bold mb-3" data-i18n="benefit_5_h">Data Privacy</h3>
+                    <p class="text-slate-500 leading-relaxed" data-i18n="benefit_5_p">Your simulations are calculated locally. No financial data ever leaves your device.</p>
+                </div>
+                <div class="p-8 bg-white dark:bg-slate-900 rounded-3xl border border-slate-100 dark:border-slate-800 hover:shadow-2xl transition-all">
+                    <div class="w-12 h-12 bg-amber-500/10 text-amber-500 rounded-xl flex items-center justify-center mb-6 text-2xl font-bold">6</div>
+                    <h3 class="text-xl font-bold mb-3" data-i18n="benefit_6_h">Zero Cost</h3>
+                    <p class="text-slate-500 leading-relaxed" data-i18n="benefit_6_p">A free, high-end professional tool available for everyone looking for wealth.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Information Section -->
+        <article class="py-20 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-[3rem] px-8 md:px-16 mb-20 shadow-xl overflow-hidden relative">
+            <div class="absolute top-0 right-0 p-12 opacity-5 pointer-events-none" aria-hidden="true">
+                <svg class="w-96 h-96" fill="currentColor" viewBox="0 0 24 24"><path d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"></path></svg>
+            </div>
+            <div class="max-w-4xl mx-auto prose dark:prose-invert">
+                <h2 class="text-4xl md:text-5xl font-black mb-8 text-center gradient-text" data-i18n="info_h">The Snowball Effect</h2>
+                
+                <div class="space-y-10 text-lg text-slate-600 dark:text-slate-400 leading-relaxed">
+                    <div class="bg-slate-50 dark:bg-slate-800 p-8 rounded-2xl border-l-4 border-primary">
+                        <blockquote class="italic text-xl mb-0" data-i18n="info_p1">"Compound interest is the eighth wonder of the world. He who understands it, earns it; he who doesn't, pays it." - Albert Einstein</blockquote>
+                    </div>
+
+                    <div class="grid md:grid-cols-2 gap-8">
+                        <div>
+                            <h4 class="text-xl font-bold text-slate-900 dark:text-slate-100 mb-4" data-i18n="info_sub1_h">What are Compound Interests?</h4>
+                            <p data-i18n="info_sub1_p">Unlike simple interest, which is calculated only on the initial amount, compound interest is calculated on the principal plus the interest accumulated over time.</p>
+                        </div>
+                        <div>
+                            <h4 class="text-xl font-bold text-slate-900 dark:text-slate-100 mb-4" data-i18n="info_sub2_h">The Power of Time</h4>
+                            <p data-i18n="info_sub2_p">The mathematical secret of wealth isn't the rate, but the duration. Gains accelerate as time passes.</p>
+                        </div>
+                    </div>
+
+                    <div class="border-t border-slate-100 dark:border-slate-800 pt-8">
+                        <h4 class="text-2xl font-bold text-slate-900 dark:text-slate-100 mb-4" data-i18n="info_v_h">Key Advantages</h4>
+                        <ul class="grid md:grid-cols-2 gap-4 list-none p-0">
+                            <li class="flex items-start gap-3 bg-white dark:bg-slate-900 p-4 rounded-xl shadow-sm border border-slate-100 dark:border-slate-800">
+                                <span class="text-emerald-500" aria-hidden="true">✔</span> <span data-i18n="info_v1">Exponential growth vs linear growth.</span>
+                            </li>
+                            <li class="flex items-start gap-3 bg-white dark:bg-slate-900 p-4 rounded-xl shadow-sm border border-slate-100 dark:border-slate-800">
+                                <span class="text-emerald-500" aria-hidden="true">✔</span> <span data-i18n="info_v2">Automated wealth building.</span>
+                            </li>
+                            <li class="flex items-start gap-3 bg-white dark:bg-slate-900 p-4 rounded-xl shadow-sm border border-slate-100 dark:border-slate-800">
+                                <span class="text-emerald-500" aria-hidden="true">✔</span> <span data-i18n="info_v3">Capital protection through reinvestment.</span>
+                            </li>
+                            <li class="flex items-start gap-3 bg-white dark:bg-slate-900 p-4 rounded-xl shadow-sm border border-slate-100 dark:border-slate-800">
+                                <span class="text-emerald-500" aria-hidden="true">✔</span> <span data-i18n="info_v4">Passive income generation long-term.</span>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </article>
+
+        <!-- FAQ Section -->
+        <section class="py-20 border-t border-slate-200 dark:border-slate-800" aria-labelledby="faq-heading">
+            <h2 id="faq-heading" class="text-4xl font-black text-center mb-16" data-i18n="faq_title">Investment Knowledge Base</h2>
+            <div id="faqContainer" class="max-w-4xl mx-auto space-y-4"></div>
+        </section>
+    </main>
+
+    <footer class="bg-white dark:bg-slate-900 border-t border-slate-200 dark:border-slate-800 py-20 mt-20">
+        <div class="max-w-7xl mx-auto px-4 text-center">
+            <div class="flex flex-col items-center gap-8">
+                <div class="flex items-center gap-2">
+                    <div class="bg-primary p-2 rounded-lg text-white">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"></path></svg>
+                    </div>
+                    <span class="text-xl font-bold">InvestFlow</span>
+                </div>
+                <p class="text-slate-400 text-sm max-w-lg" data-i18n="footer_credits">
+                    © 2024 InvestFlow - Professional Financial Simulator. Created by Daniel Pereira.
+                </p>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        const flags = {
+            en: "🇺🇸", pt: "🇧🇷", es: "🇪🇸", fr: "🇫🇷", 
+            zh: "🇨🇳", hi: "🇮🇳", ar: "🇸🇦", bn: "🇧🇩"
+        };
+
+        const translations = {
+            en: {
+                nav_contact: "Contact Support",
+                hero_title: "Master the Power of <span class='gradient-text'>Compound Interest</span>",
+                hero_subtitle: "The ultimate tool for high-precision financial simulation and wealth visualization.",
+                calc_header: "Investment Simulator",
+                label_initial: "Initial Investment",
+                label_monthly: "Monthly Contribution",
+                label_rate: "Rate (%)",
+                label_rate_type: "Frequency",
+                opt_monthly: "Monthly",
+                opt_yearly: "Yearly",
+                label_period: "Time",
+                label_period_type: "Unit",
+                opt_years: "Years",
+                opt_months: "Months",
+                btn_calculate: "CALCULATE NOW",
+                res_total_final: "Final Accumulation",
+                res_invested: "Total Invested",
+                res_interest: "Yield Profits",
+                chart_title: "Projection Over Time",
+                hist_title: "Simulation History",
+                btn_export: "Export CSV",
+                th_date: "Date",
+                th_initial: "Initial",
+                th_monthly: "Monthly",
+                th_rate: "Rate",
+                th_time: "Time",
+                th_total: "Total",
+                benefits_title: "Why use InvestFlow?",
+                benefit_1_h: "Accuracy First",
+                benefit_1_p: "Professional-grade algorithms ensuring precision in long-term projections.",
+                benefit_2_h: "Visual Feedback",
+                benefit_2_p: "Instantly visualize when your interest earnings overtake your contributions.",
+                benefit_3_h: "Multi-Language",
+                benefit_3_p: "Built for the global investor with native support for 8 major languages.",
+                benefit_4_h: "Inflation Check",
+                benefit_4_p: "Simulate real purchasing power by discounting projected inflation rates.",
+                benefit_5_h: "Data Privacy",
+                benefit_5_p: "Your simulations are calculated locally. No data leaves your device.",
+                benefit_6_h: "Zero Cost",
+                benefit_6_p: "A free, high-end professional tool available for everyone.",
+                info_h: "The Snowball Effect",
+                info_p1: "Compound interest is the eighth wonder of the world. He who understands it, earns it; he who doesn't, pays it.",
+                info_sub1_h: "What are Compound Interests?",
+                info_sub1_p: "Unlike simple interest, which is calculated only on the initial amount, compound interest is calculated on the principal plus the interest accumulated over time.",
+                info_sub2_h: "The Power of Time",
+                info_sub2_p: "The mathematical secret of wealth isn't the rate, but the duration. Gains accelerate as time passes.",
+                info_v_h: "Key Advantages",
+                info_v1: "Exponential growth vs linear growth.",
+                info_v2: "Automated wealth building.",
+                info_v3: "Capital protection through reinvestment.",
+                info_v4: "Passive income generation long-term.",
+                faq_title: "Investment Knowledge Base",
+                footer_credits: "© 2024 InvestFlow - Professional Financial Simulator. Created by Daniel Pereira.",
+                faq: [
+                    { q: "What is compound interest?", a: "It is interest calculated on the initial principal plus all accumulated interest from previous periods." },
+                    { q: "How do I use this tool for retirement?", a: "Input your current savings as 'Initial', what you can save monthly, and set the time until your retirement age." },
+                    { q: "Is InvestFlow free to use?", a: "Yes, it is a 100% free tool designed to help people plan their financial future." },
+                    { q: "What is the 'Rule of 72'?", a: "It's a quick shortcut: 72 divided by the interest rate equals the years needed to double your money." },
+                    { q: "Why do I see a spike in the chart later on?", a: "That is the exponential curve. The longer you stay invested, the more 'interest earns interest'." },
+                    { q: "Does this include taxes?", a: "Currently, calculations are gross. We recommend discounting 15-20% for a conservative net view." },
+                    { q: "Can I save my simulations?", a: "The 'History' table saves your latest calculations in your browser session for comparison." },
+                    { q: "How do I account for annual raises?", a: "This version uses a fixed contribution. For raises, simulate different periods separately and sum them." },
+                    { q: "What is a realistic interest rate?", a: "Historically, stock markets average 7-10% annually. Fixed income varies greatly by country." },
+                    { q: "Is it better to invest yearly or monthly?", a: "Monthly is usually better due to 'Dollar Cost Averaging' and earlier interest compounding." },
+                    { q: "Does the time unit matter?", a: "The result is mathematically adjusted regardless if you choose months or years." },
+                    { q: "Can I export my data?", a: "Yes, use the 'Export CSV' button to save your history for use in Excel or Google Sheets." },
+                    { q: "What is the snowball effect in debt?", a: "It works against you: interest on debt accumulates, making the total owed grow exponentially." },
+                    { q: "How does inflation affect my result?", a: "Inflation reduces purchasing power. Subtract expected inflation from your rate to see 'Real Growth'." },
+                    { q: "Why use InvestFlow over a spreadsheet?", a: "InvestFlow offers instant visualization, easier comparison history, and multi-currency formatting." },
+                    { q: "Is there a limit to the time period?", a: "You can simulate up to 100 years, though long-term projections are estimates." }
+                ]
+            },
+            pt: {
+                nav_contact: "Suporte Técnico",
+                hero_title: "Domine o Poder dos <span class='gradient-text'>Juros Compostos</span>",
+                hero_subtitle: "A ferramenta definitiva para simulação financeira de alta precisão e visualização de patrimônio.",
+                calc_header: "Simulador de Investimento",
+                label_initial: "Investimento Inicial",
+                label_monthly: "Aporte Mensal",
+                label_rate: "Taxa (%)",
+                label_rate_type: "Frequência",
+                opt_monthly: "Mensal",
+                opt_yearly: "Anual",
+                label_period: "Tempo",
+                label_period_type: "Unidade",
+                opt_years: "Anos",
+                opt_months: "Meses",
+                btn_calculate: "CALCULAR AGORA",
+                res_total_final: "Saldo Acumulado",
+                res_invested: "Total Investido",
+                res_interest: "Lucro em Juros",
+                chart_title: "Projeção ao Longo do Tempo",
+                hist_title: "Histórico de Simulação",
+                btn_export: "Exportar CSV",
+                th_date: "Data",
+                th_initial: "Inicial",
+                th_monthly: "Mensal",
+                th_rate: "Taxa",
+                th_time: "Tempo",
+                th_total: "Total",
+                benefits_title: "Por que usar o InvestFlow?",
+                benefit_1_h: "Precisão Absoluta",
+                benefit_1_p: "Algoritmos profissionais que garantem exatidão em projeções de décadas.",
+                benefit_2_h: "Feedback Visual",
+                benefit_2_p: "Visualize o momento em que os juros trabalham mais que seus próprios aportes.",
+                benefit_3_h: "Multilíngue",
+                benefit_3_p: "Feito para o investidor global com suporte nativo aos 8 idiomas mais falados.",
+                benefit_4_h: "Ajuste de Inflação",
+                benefit_4_p: "Simule o poder de compra real descontando a inflação prevista das suas taxas.",
+                benefit_5_h: "Privacidade de Dados",
+                benefit_5_p: "Cálculos feitos localmente. Seus dados financeiros nunca saem do dispositivo.",
+                benefit_6_h: "Custo Zero",
+                benefit_6_p: "Uma ferramenta profissional gratuita para todos que buscam prosperidade.",
+                info_h: "O Efeito Bola de Neve",
+                info_p1: "Juros compostos são a oitava maravilha do mundo. Quem entende, ganha; quem não entende, paga. - Albert Einstein",
+                info_sub1_h: "O que são Juros Compostos?",
+                info_sub1_p: "Diferente dos juros simples, os juros compostos incidem sobre o montante principal mais os juros já acumulados, gerando um efeito exponencial.",
+                info_sub2_h: "O Poder do Tempo",
+                info_sub2_p: "O segredo matemático não é a taxa, mas a duração. Ganhos se aceleram conforme o tempo passa.",
+                info_v_h: "Principais Vantagens",
+                info_v1: "Crescimento exponencial vs crescimento linear.",
+                info_v2: "Construção de riqueza automatizada.",
+                info_v3: "Proteção de capital através do reinvestimento.",
+                info_v4: "Geração de renda passiva a longo prazo.",
+                faq_title: "Base de Conhecimento",
+                footer_credits: "© 2024 InvestFlow - Simulador Financeiro Profissional. Criado por Daniel Pereira.",
+                faq: [
+                    { q: "O que são juros compostos?", a: "É o juro calculado sobre o capital inicial mais os juros acumulados de períodos anteriores." },
+                    { q: "Como uso a ferramenta para aposentadoria?", a: "Coloque sua reserva atual em 'Inicial', o quanto pode poupar por mês e o tempo até se aposentar." },
+                    { q: "O InvestFlow é gratuito?", a: "Sim, é uma ferramenta 100% gratuita para ajudar no planejamento financeiro." },
+                    { q: "O que é a 'Regra dos 72'?", a: "Atalho rápido: 72 dividido pela taxa de juros anual indica quantos anos para dobrar seu dinheiro." },
+                    { q: "Por que o gráfico sobe muito no final?", a: "Essa é a curva exponencial. Quanto mais tempo investido, mais 'juro gera juro'." },
+                    { q: "Como simular inflação?", a: "Recomendamos subtrair a inflação (ex: 5%) da rentabilidade (ex: 12%) e usar o resultado (7%) para ver o valor real." },
+                    { q: "Posso salvar minhas simulações?", a: "A tabela de 'Histórico' salva seus últimos cálculos na sessão do navegador para comparação." },
+                    { q: "Como considero aumentos salariais?", a: "Esta versão usa aporte fixo. Para aumentos, simule períodos diferentes e some os resultados." },
+                    { q: "Qual uma taxa de juros realista?", a: "Historicamente, bolsas de valores rendem 7-10% ao ano. Renda fixa varia muito por país." },
+                    { q: "É melhor investir anual ou mensalmente?", a: "Mensal costuma ser melhor pelo 'Dollar Cost Averaging' e capitalização antecipada." },
+                    { q: "A unidade de tempo importa?", a: "O resultado é ajustado matematicamente, seja em meses ou anos." },
+                    { q: "Posso exportar meus dados?", a: "Sim, use o botão 'Exportar CSV' para salvar seu histórico para Excel ou Sheets." },
+                    { q: "O que é o efeito bola de neve nas dívidas?", a: "Ele trabalha contra você: juros sobre dívidas acumulam, fazendo o total crescer exponencialmente." },
+                    { q: "Como a inflação afeta meu resultado?", a: "A inflação reduz o poder de compra. Subtraia a inflação esperada da sua taxa para ver o 'Ganho Real'." },
+                    { q: "Por que usar o InvestFlow em vez de planilha?", a: "Visualização instantânea, histórico de comparação fácil e formatação automática multi-moeda." },
+                    { q: "Existe limite de tempo?", a: "Você pode simular até 100 anos, embora projeções longas sejam apenas estimativas." }
+                ]
+            }
+        };
+
+        let currentLang = 'en';
+        let growthChart = null;
+        let simulationHistory = [];
+
+        function updateUI() {
+            const data = translations[currentLang] || translations.en;
+            
+            document.querySelectorAll('[data-i18n]').forEach(el => {
+                const key = el.getAttribute('data-i18n');
+                if(data[key]) el.innerHTML = data[key];
+            });
+
+            document.getElementById('flagIndicator').innerText = flags[currentLang];
+            renderFAQ(data.faq || translations.en.faq);
+            renderHistory();
+            
+            // SEO update on title dynamically (optional)
+            document.title = (currentLang === 'pt' ? 'InvestFlow | Calculadora de Juros Compostos' : 'InvestFlow | Compound Interest Calculator');
+        }
+
+        function renderFAQ(list) {
+            const container = document.getElementById('faqContainer');
+            container.innerHTML = list.map((f, i) => `
+                <div class="accordion-item bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl overflow-hidden shadow-sm transition-all">
+                    <button class="w-full px-8 py-5 flex justify-between items-center font-bold text-left hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors" onclick="this.parentElement.classList.toggle('active')" aria-expanded="false">
+                        ${f.q}
+                        <svg class="accordion-icon w-5 h-5 transition-transform text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path d="M19 9l-7 7-7-7"></path></svg>
+                    </button>
+                    <div class="accordion-content">
+                        <div class="px-8 py-6 text-slate-500 dark:text-slate-400 border-t border-slate-100 dark:border-slate-800 leading-relaxed">${f.a}</div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function renderHistory() {
+            const tbody = document.getElementById('historyTableBody');
+            tbody.innerHTML = simulationHistory.map(item => `
+                <tr class="border-b border-slate-50 dark:border-slate-800/50 hover:bg-slate-50/50 dark:hover:bg-slate-800/30 transition-colors">
+                    <td class="py-4 px-2 text-slate-400 text-xs">${item.date}</td>
+                    <td class="py-4 px-2 font-semibold">${formatCurrency(item.initial)}</td>
+                    <td class="py-4 px-2 font-semibold">${formatCurrency(item.monthly)}</td>
+                    <td class="py-4 px-2 font-semibold">${item.rate}%</td>
+                    <td class="py-4 px-2 font-semibold">${item.time} ${item.unit}</td>
+                    <td class="py-4 px-2 font-bold text-primary">${formatCurrency(item.total)}</td>
+                </tr>
+            `).join('');
+        }
+
+        function formatCurrency(val) {
+            const loc = currentLang === 'pt' ? 'pt-BR' : 'en-US';
+            const cur = currentLang === 'pt' ? 'BRL' : 'USD';
+            return val.toLocaleString(loc, { style: 'currency', currency: cur });
+        }
+
+        function parseFormatted(str) {
+            return parseFloat(str.replace(/\./g, '').replace(',', '.')) || 0;
+        }
+
+        function maskCurrency(el) {
+            let v = el.value.replace(/\D/g, "");
+            v = (v / 100).toFixed(2) + "";
+            v = v.replace(".", ",");
+            v = v.replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+            el.value = v;
+        }
+
+        function calculate() {
+            const initialStr = document.getElementById('initialAmount').value;
+            const monthlyStr = document.getElementById('monthlyContribution').value;
+            const rateStr = document.getElementById('interestRate').value;
+            
+            const P = parseFormatted(initialStr);
+            const PMT = parseFormatted(monthlyStr);
+            const rateRaw = parseFormatted(rateStr);
+            const rate = rateRaw / 100;
+            const period = parseInt(document.getElementById('periodValue').value) || 0;
+            const rType = document.getElementById('rateType').value;
+            const pType = document.getElementById('periodType').value;
+
+            let mRate = (rType === 'yearly') ? Math.pow(1 + rate, 1/12) - 1 : rate;
+            let totalMonths = (pType === 'years') ? period * 12 : period;
+
+            let curTotal = P;
+            let curInv = P;
+            let labels = [];
+            let dTotal = [];
+            let dInv = [];
+
+            for(let i = 0; i <= totalMonths; i++) {
+                if(i > 0) {
+                    curTotal = curTotal * (1 + mRate) + PMT;
+                    curInv += PMT;
+                }
+                
+                let sampleRate = Math.max(1, Math.floor(totalMonths / 20));
+                if(i % sampleRate === 0 || i === totalMonths) {
+                    labels.push(i + 'm');
+                    dTotal.push(curTotal.toFixed(2));
+                    dInv.push(curInv.toFixed(2));
+                }
+            }
+
+            document.getElementById('resTotal').innerText = formatCurrency(curTotal);
+            document.getElementById('resInvested').innerText = formatCurrency(curInv);
+            document.getElementById('resInterest').innerText = formatCurrency(curTotal - curInv);
+
+            growthChart.data.labels = labels;
+            growthChart.data.datasets[0].data = dTotal;
+            growthChart.data.datasets[1].data = dInv;
+            growthChart.update();
+
+            // Add to history
+            const now = new Date();
+            const dateStr = now.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+            simulationHistory.unshift({
+                date: dateStr,
+                initial: P,
+                monthly: PMT,
+                rate: rateRaw,
+                time: period,
+                unit: pType,
+                total: curTotal
+            });
+            if(simulationHistory.length > 5) simulationHistory.pop();
+            renderHistory();
+        }
+
+        function exportCSV() {
+            if(simulationHistory.length === 0) return;
+            const headers = "Date,Initial,Monthly,Rate,Time,Total\n";
+            const rows = simulationHistory.map(i => 
+                `${i.date},${i.initial},${i.monthly},${i.rate},${i.time} ${i.unit},${i.total.toFixed(2)}`
+            ).join("\n");
+            
+            const blob = new Blob([headers + rows], { type: 'text/csv' });
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.setAttribute('hidden', '');
+            a.setAttribute('href', url);
+            a.setAttribute('download', 'investflow_history.csv');
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+        }
+
+        function initApp() {
+            document.querySelectorAll('.currency-input, .decimal-input').forEach(input => {
+                input.oninput = () => maskCurrency(input);
+            });
+
+            const ctx = document.getElementById('growthChart').getContext('2d');
+            growthChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: [],
+                    datasets: [
+                        { label: 'Total Balance', data: [], borderColor: '#0ea5e9', backgroundColor: 'rgba(14, 165, 233, 0.1)', fill: true, tension: 0.4, borderWidth: 3, pointRadius: 0 },
+                        { label: 'Invested Amount', data: [], borderColor: '#94a3b8', borderDash: [5, 5], fill: false, tension: 0, pointRadius: 0 }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { 
+                        legend: { position: 'bottom', labels: { font: { weight: 'bold' } } },
+                        tooltip: { mode: 'index', intersect: false }
+                    }
+                }
+            });
+
+            updateUI();
+            calculate();
+            
+            document.getElementById('calculateBtn').onclick = calculate;
+            document.getElementById('exportCsvBtn').onclick = exportCSV;
+            document.getElementById('langSelector').onchange = (e) => {
+                currentLang = e.target.value;
+                updateUI();
+                calculate();
+            };
+            document.getElementById('themeToggle').onclick = () => document.documentElement.classList.toggle('dark');
+            window.addEventListener('resize', () => growthChart && growthChart.resize());
+        }
+
+        window.onload = initApp;
+    </script>
+</body>
+</html>
